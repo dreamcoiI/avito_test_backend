@@ -1,9 +1,9 @@
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMPTZ DEFAULT current_timestamp
     );
 
-CREATE TABLE IF NOT EXISTS segment (
+CREATE TABLE IF NOT EXISTS segments (
     id SERIAL PRIMARY KEY,
     segment_name TEXT NOT NULL UNIQUE ,
     created_at timestamptz DEFAULT current_timestamp
