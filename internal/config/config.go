@@ -29,7 +29,7 @@ func LoadConfigFromEnv() Config {
 	config.DBPass = getEnvOrDefault("DBPASS", "Avito")
 	config.DBHost = getEnvOrDefault("DBHOST", "localhost")
 	config.DBPort = getEnvOrDefaultInt("DBPORT", 5432)
-	config.DBName = getEnvOrDefault("DBNAME", "test")
+	config.DBName = getEnvOrDefault("DBNAME", "test") //TODO created .env file
 
 	return config
 }
