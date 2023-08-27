@@ -17,7 +17,7 @@ type Config struct {
 }
 
 func LoadConfigFromEnv(envFilePath string) Config {
-	err := godotenv.Load()
+	err := godotenv.Load(envFilePath)
 	if err != nil {
 		fmt.Println("Error loading end file")
 	}

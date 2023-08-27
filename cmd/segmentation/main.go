@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// Путь к файлу с переменными окружения
-	envFilePath := "path/to/your/env/file.env"
+	envFilePath := "config.env"
 
 	// Загрузка конфигурации из файла с переменными окружения
 	config := config2.LoadConfigFromEnv(envFilePath)
@@ -23,7 +23,6 @@ func main() {
 
 	// Инициализация контекста и отмены
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	// Обработка сигналов завершения
 	signalChannel := make(chan os.Signal, 1)

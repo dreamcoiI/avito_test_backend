@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"github.com/dreamcoiI/avito_test_backend/api"
 	"github.com/dreamcoiI/avito_test_backend/api/middleware"
 	"github.com/dreamcoiI/avito_test_backend/internal/config"
@@ -11,13 +12,14 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/rs/zerolog"
 	"net/http"
+	"time"
 )
 
 type Server struct {
 	config     config.Config
 	context    context.Context
 	server     *http.Server
-	storage    *storage.Storage
+	storage    *pgxpool.Pool
 	middleware *zerolog.Logger
 }
 
@@ -65,5 +67,19 @@ func (app *Server) Start() error {
 }
 
 func (app *Server) Shutdown() error {
+	app.middleware.Info().Msg("Server stopped")
+
+	ctxShutdown, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	app.storage.Close()
+
+	if err := app.server.Shutdown(ctxShutdown); err != nil {
+		app.middleware.Err(err)
+		return fmt.Errorf("server shutdown failed: %w", err)
+	}
+
+	app.middleware.Info().Msg("Server shutdown completed")
+
 	return nil
 }
