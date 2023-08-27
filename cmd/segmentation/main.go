@@ -12,19 +12,14 @@ import (
 )
 
 func main() {
-	// Путь к файлу с переменными окружения
 	envFilePath := "config.env"
 
-	// Загрузка конфигурации из файла с переменными окружения
 	config := config2.LoadConfigFromEnv(envFilePath)
 
-	// Создание логгера
 	logger := new(zerolog.Logger)
 
-	// Инициализация контекста и отмены
 	ctx, cancel := context.WithCancel(context.Background())
 
-	// Обработка сигналов завершения
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
 	server := app.NewServer(config, ctx, logger)
@@ -37,9 +32,6 @@ func main() {
 		cancel()
 	}()
 
-	// Создание сервера
-
-	// Запуск сервера
 	if err := server.Start(); err != nil {
 		logger.Err(err)
 	}

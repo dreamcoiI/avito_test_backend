@@ -56,5 +56,6 @@ func getEnvOrDefaultInt(key string, defaultValue int) int {
 }
 
 func (config *Config) GetDBString() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s", config.DBUser, config.DBPass, config.DBHost, config.DBPort, config.DBName)
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s", config.DBUser,
+		config.DBPass, config.DBHost, config.DBPort, config.DBName)
 }
