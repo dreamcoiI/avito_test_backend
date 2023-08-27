@@ -39,6 +39,7 @@ func (app *Server) Start() error {
 
 	app.storage, err = pgxpool.Connect(app.context, app.config.GetDBString())
 	if err != nil {
+		fmt.Println("Failed to connect to the database")
 		app.middleware.Fatal().Err(err).Msg("Failed to connect to the database")
 	}
 

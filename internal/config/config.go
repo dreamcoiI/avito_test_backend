@@ -25,11 +25,11 @@ func LoadConfigFromEnv(envFilePath string) Config {
 	var config Config
 
 	config.Port = getEnvOrDefault("PORT", "8080")
-	config.DBUser = getEnvOrDefault("DBUSER", "avito_tech")
-	config.DBPass = getEnvOrDefault("DBPASS", "Avito")
+	config.DBUser = getEnvOrDefault("DBUSER", "avitoTech")
+	config.DBPass = getEnvOrDefault("DBPASS", "")
 	config.DBHost = getEnvOrDefault("DBHOST", "localhost")
 	config.DBPort = getEnvOrDefaultInt("DBPORT", 5432)
-	config.DBName = getEnvOrDefault("DBNAME", "test") //TODO created .env file
+	config.DBName = getEnvOrDefault("DBNAME", "avito")
 
 	return config
 }
@@ -56,5 +56,5 @@ func getEnvOrDefaultInt(key string, defaultValue int) int {
 }
 
 func (config *Config) GetDBString() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.DBUser, config.DBPass, config.DBHost, config.DBPort, config.DBName)
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s", config.DBUser, config.DBPass, config.DBHost, config.DBPort, config.DBName)
 }
