@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/dreamcoiI/avito_test_backend/internal/model"
 	"github.com/dreamcoiI/avito_test_backend/internal/service"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -16,6 +18,51 @@ func NewHandler(Service *service.Service) *Handler {
 	newHandler := new(Handler)
 	newHandler.service = Service
 	return newHandler
+}
+
+func (h *Handler) GetUserSegment(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userID := vars["id_user"]
+	if userID == "" {
+		WrapError(w, errors.New("missing id"))
+		return
+	}
+
+	segment, err := h.service.GetUserSegment(userID)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	response := map[string]interface{}{
+		"result": "OK",
+		"data":   segment,
+	}
+
+	WrapOK(w, response)
+}
+
+func (h *Handler) CreateUserSegment(w http.ResponseWriter, r *http.Request) {
+	var newUserSegment model.UserSegment
+
+	err := json.NewDecoder(r.Body).Decode(&newUserSegment)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	err = h.service.CreateUserSegment(&newUserSegment)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	response := map[string]interface{}{
+		"result": "OK",
+		"data":   newUserSegment,
+	}
+
+	WrapOK(w, response)
 }
 
 func WrapOK(w http.ResponseWriter, m map[string]interface{}) {

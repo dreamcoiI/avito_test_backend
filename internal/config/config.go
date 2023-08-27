@@ -16,7 +16,7 @@ type Config struct {
 	DBName string
 }
 
-func LoadConfigFromEnv() Config {
+func LoadConfigFromEnv(envFilePath string) Config {
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Println("Error loading end file")
@@ -53,4 +53,8 @@ func getEnvOrDefaultInt(key string, defaultValue int) int {
 		return defaultValue
 	}
 	return valueInt
+}
+
+func (config *Config) GetDBString() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.DBUser, config.DBPass, config.DBHost, config.DBPort, config.DBName)
 }

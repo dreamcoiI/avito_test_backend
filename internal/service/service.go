@@ -15,7 +15,15 @@ func NewService(storage *storage.Storage) *Service {
 	return newService
 }
 
-func (s *Service) FindUserSegment(segmentName string) ([]model.UserSegment, error) {
-	result, err := s.Storage.FindUserSegment(segmentName)
+func (s *Service) GetUserSegment(segmentName string) ([]model.UserSegment, error) {
+	result, err := s.Storage.GetUserSegment(segmentName)
 	return result, err
+}
+
+func (s *Service) CreateUserSegment(segment *model.UserSegment) error {
+	err := s.Storage.CreateUserSegment(segment)
+	if err != nil {
+		return err
+	}
+	return nil
 }
