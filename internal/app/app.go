@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/dreamcoiI/avito_test_backend/api"
 	"github.com/dreamcoiI/avito_test_backend/api/middleware"
@@ -9,7 +10,7 @@ import (
 	"github.com/dreamcoiI/avito_test_backend/internal/handlers"
 	service2 "github.com/dreamcoiI/avito_test_backend/internal/service"
 	"github.com/dreamcoiI/avito_test_backend/internal/storage"
-	"github.com/jackc/pgx/v4/pgxpool"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/rs/zerolog"
 	"net/http"
 	"time"
@@ -19,7 +20,7 @@ type Server struct {
 	config     config.Config
 	context    context.Context
 	server     *http.Server
-	storage    *pgxpool.Pool
+	storage    *sql.DB
 	middleware *zerolog.Logger
 }
 
@@ -37,7 +38,9 @@ func (app *Server) Start() error {
 
 	var err error
 
-	app.storage, err = pgxpool.Connect(app.context, app.config.GetDBString())
+	//app.storage, err = pgxpool.Connect(app.context, app.config.GetDBString())
+	app.storage, err = sql.Open("pgx", app.config.GetDBString())
+
 	if err != nil {
 		fmt.Println("Failed to connect to the database")
 		app.middleware.Fatal().Err(err).Msg("Failed to connect to the database")

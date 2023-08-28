@@ -8,6 +8,7 @@ import (
 	"github.com/dreamcoiI/avito_test_backend/internal/service"
 	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 )
 
 type Handler struct {
@@ -22,13 +23,19 @@ func NewHandler(Service *service.Service) *Handler {
 
 func (h *Handler) GetUserSegment(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userID := vars["id_user"]
-	if userID == "" {
+	if vars["user_id"] == "" {
 		WrapError(w, errors.New("missing id"))
 		return
 	}
 
-	segment, err := h.service.GetUserSegment(userID)
+	userID, err := strconv.Atoi(vars["user_id"])
+	if err != nil {
+		WrapError(w, errors.New("wrong id"))
+		return
+	}
+
+	ctx := r.Context()
+	segment, err := h.service.GetUserSegment(ctx, userID)
 	if err != nil {
 		WrapError(w, err)
 		return
@@ -39,7 +46,20 @@ func (h *Handler) GetUserSegment(w http.ResponseWriter, r *http.Request) {
 		"data":   segment,
 	}
 
+	resp, err := json.Marshal(response)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	_, err = w.Write(resp)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
 	WrapOK(w, response)
+
 }
 
 func (h *Handler) CreateUserSegment(w http.ResponseWriter, r *http.Request) {
