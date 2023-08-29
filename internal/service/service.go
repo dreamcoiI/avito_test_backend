@@ -21,6 +21,11 @@ func (s *Service) GetUserSegment(ctx context.Context, userID int) ([]string, err
 	return result, err
 }
 
+func (s *Service) CreateSegment(ctx context.Context, slug string) error {
+	err := s.Storage.CreateSegments(ctx, slug)
+	return err
+}
+
 func (s *Service) CreateUserSegment(segment *model.UserSegment) error {
 	err := s.Storage.CreateUserSegment(segment)
 	if err != nil {

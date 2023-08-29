@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/dreamcoiI/avito_test_backend/internal/model"
 	"github.com/dreamcoiI/avito_test_backend/internal/service"
 	"net/http"
 )
@@ -23,13 +22,14 @@ func (h *Handler) GetUserSegment(w http.ResponseWriter, r *http.Request) {
 	var requestData struct {
 		UserID int `json:"user_id"`
 	}
-	fmt.Println("Денис Абоба")
+
 	err := json.NewDecoder(r.Body).Decode(&requestData)
 	if err != nil {
 		WrapError(w, err)
 		return
 	}
 
+	fmt.Println(requestData.UserID)
 	ctx := r.Context()
 	segment, err := h.service.GetUserSegment(ctx, requestData.UserID)
 	if err != nil {
@@ -58,57 +58,20 @@ func (h *Handler) GetUserSegment(w http.ResponseWriter, r *http.Request) {
 	WrapOK(w, response)
 }
 
-//func (h *Handler) GetUserSegment(w http.ResponseWriter, r *http.Request) {
-//	vars := mux.Vars(r)
-//	if vars["user_id"] == "" {
-//		WrapError(w, errors.New("missing id"))
-//		return
-//	}
-//
-//	userID, err := strconv.Atoi(vars["user_id"])
-//	if err != nil {
-//		WrapError(w, errors.New("wrong id"))
-//		return
-//	}
-//
-//	ctx := r.Context()
-//	segment, err := h.service.GetUserSegment(ctx, userID)
-//	if err != nil {
-//		WrapError(w, err)
-//		return
-//	}
-//
-//	response := map[string]interface{}{
-//		"result": "OK",
-//		"data":   segment,
-//	}
-//
-//	resp, err := json.Marshal(response)
-//	if err != nil {
-//		WrapError(w, err)
-//		return
-//	}
-//
-//	_, err = w.Write(resp)
-//	if err != nil {
-//		WrapError(w, err)
-//		return
-//	}
-//
-//	WrapOK(w, response)
-//
-//}
+func (h *Handler) CreateSegment(w http.ResponseWriter, r *http.Request) {
+	var requestData struct {
+		Slug string `json:"slug"`
+	}
 
-func (h *Handler) CreateUserSegment(w http.ResponseWriter, r *http.Request) {
-	var newUserSegment model.UserSegment
-
-	err := json.NewDecoder(r.Body).Decode(&newUserSegment)
+	err := json.NewDecoder(r.Body).Decode(&requestData)
 	if err != nil {
 		WrapError(w, err)
 		return
 	}
 
-	err = h.service.CreateUserSegment(&newUserSegment)
+	fmt.Println(requestData.Slug + "ABOBA")
+	ctx := r.Context()
+	err = h.service.CreateSegment(ctx, requestData.Slug)
 	if err != nil {
 		WrapError(w, err)
 		return
@@ -116,7 +79,7 @@ func (h *Handler) CreateUserSegment(w http.ResponseWriter, r *http.Request) {
 
 	response := map[string]interface{}{
 		"result": "OK",
-		"data":   newUserSegment,
+		"data":   requestData.Slug,
 	}
 
 	WrapOK(w, response)

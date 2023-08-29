@@ -23,8 +23,6 @@ func (s *Storage) GetUserSegment(ctx context.Context, id int) ([]string, error) 
 
 	var segmentNames []string
 
-	//time.Sleep(5 * time.Second)
-	fmt.Println(id)
 	rows, err := s.db.Query(query, id)
 
 	if err != nil {
@@ -46,16 +44,23 @@ func (s *Storage) GetUserSegment(ctx context.Context, id int) ([]string, error) 
 	if err != nil {
 		log.Fatal(err)
 	}
-	//err := s.db.QueryRowContext(ctx, query, int64(id)).Scan(&segmentName)
-	//if err == sql.ErrNoRows {
-	//	fmt.Println("Денис Абоба")
-	//	return "", nil
-	//} else if err != nil {
-	//	return "", fmt.Errorf("failed on db.QueryRowContext: %w ", err)
-	//}
+
 	fmt.Println(segmentNames)
 	return segmentNames, nil
-} //TODO change GET request for POST ( JSON-body post for bd request on id user for user_id)
+}
+
+func (s *Storage) CreateSegments(ctx context.Context, slug string) error {
+	query := "INSERT INTO segments VALUES ((SELECT max(id) +1 from segments), $1) "
+
+	fmt.Println("Denis aboba")
+
+	_, err := s.db.ExecContext(ctx, query, slug)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	return nil
+}
 
 func (s *Storage) CreateUserSegment(segment *model.UserSegment) error {
 	//

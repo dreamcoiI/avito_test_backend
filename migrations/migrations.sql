@@ -23,3 +23,4 @@ insert into segment_user values (1, 1, default,default);
 select * from segment_user;
 select * from segments;
 
+

@@ -9,7 +9,7 @@ type User struct {
 
 type Segment struct {
 	ID          int       `json:"id"`
-	SegmentName string    `json:"segment_name"`
+	SegmentName string    `json:"slug"`
 	CreatedAT   time.Time `json:"created_at"`
 }
 
