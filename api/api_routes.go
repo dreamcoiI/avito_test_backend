@@ -8,7 +8,7 @@ import (
 func ConfigureRouters(h *handlers.Handler) *mux.Router {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/user_segment/find/{user_id:[0-9]+}", h.GetUserSegment).Methods("GET")
+	router.HandleFunc("/user_segment/find/", h.GetUserSegment).Methods("POST")
 	router.HandleFunc("/user_segment", h.CreateUserSegment).Methods("POST")
 	//router.HandleFunc()
 	return router

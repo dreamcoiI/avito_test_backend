@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"github.com/dreamcoiI/avito_test_backend/internal/model"
 	"github.com/dreamcoiI/avito_test_backend/internal/service"
-	"github.com/gorilla/mux"
 	"net/http"
-	"strconv"
 )
 
 type Handler struct {
@@ -22,20 +20,18 @@ func NewHandler(Service *service.Service) *Handler {
 }
 
 func (h *Handler) GetUserSegment(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	if vars["user_id"] == "" {
-		WrapError(w, errors.New("missing id"))
-		return
+	var requestData struct {
+		UserID int `json:"user_id"`
 	}
-
-	userID, err := strconv.Atoi(vars["user_id"])
+	fmt.Println("Денис Абоба")
+	err := json.NewDecoder(r.Body).Decode(&requestData)
 	if err != nil {
-		WrapError(w, errors.New("wrong id"))
+		WrapError(w, err)
 		return
 	}
 
 	ctx := r.Context()
-	segment, err := h.service.GetUserSegment(ctx, userID)
+	segment, err := h.service.GetUserSegment(ctx, requestData.UserID)
 	if err != nil {
 		WrapError(w, err)
 		return
@@ -52,6 +48,7 @@ func (h *Handler) GetUserSegment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(resp)
 	if err != nil {
 		WrapError(w, err)
@@ -59,8 +56,48 @@ func (h *Handler) GetUserSegment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	WrapOK(w, response)
-
 }
+
+//func (h *Handler) GetUserSegment(w http.ResponseWriter, r *http.Request) {
+//	vars := mux.Vars(r)
+//	if vars["user_id"] == "" {
+//		WrapError(w, errors.New("missing id"))
+//		return
+//	}
+//
+//	userID, err := strconv.Atoi(vars["user_id"])
+//	if err != nil {
+//		WrapError(w, errors.New("wrong id"))
+//		return
+//	}
+//
+//	ctx := r.Context()
+//	segment, err := h.service.GetUserSegment(ctx, userID)
+//	if err != nil {
+//		WrapError(w, err)
+//		return
+//	}
+//
+//	response := map[string]interface{}{
+//		"result": "OK",
+//		"data":   segment,
+//	}
+//
+//	resp, err := json.Marshal(response)
+//	if err != nil {
+//		WrapError(w, err)
+//		return
+//	}
+//
+//	_, err = w.Write(resp)
+//	if err != nil {
+//		WrapError(w, err)
+//		return
+//	}
+//
+//	WrapOK(w, response)
+//
+//}
 
 func (h *Handler) CreateUserSegment(w http.ResponseWriter, r *http.Request) {
 	var newUserSegment model.UserSegment
