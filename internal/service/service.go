@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"github.com/dreamcoiI/avito_test_backend/internal/model"
 	"github.com/dreamcoiI/avito_test_backend/internal/storage"
 )
 
@@ -26,8 +25,13 @@ func (s *Service) CreateSegment(ctx context.Context, slug string) error {
 	return err
 }
 
-func (s *Service) CreateUserSegment(segment *model.UserSegment) error {
-	err := s.Storage.CreateUserSegment(segment)
+func (s *Service) DeleteSegment(ctx context.Context, slug string) error {
+	err := s.Storage.DeleteSegment(ctx, slug)
+	return err
+}
+
+func (s *Service) AddSegmentToUser(ctx context.Context, adds []string, id int) error {
+	err := s.Storage.AddSegmentToUser(ctx, adds, id)
 	if err != nil {
 		return err
 	}

@@ -85,6 +85,62 @@ func (h *Handler) CreateSegment(w http.ResponseWriter, r *http.Request) {
 	WrapOK(w, response)
 }
 
+func (h *Handler) DeleteSegment(w http.ResponseWriter, r *http.Request) {
+	var requestData struct {
+		Slug string `json:"slug"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&requestData)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	fmt.Println(requestData.Slug + "ABOBA")
+
+	ctx := r.Context()
+	err = h.service.DeleteSegment(ctx, requestData.Slug)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	response := map[string]interface{}{
+		"result": "OK",
+		"data":   requestData.Slug,
+	}
+
+	WrapOK(w, response)
+}
+
+func (h *Handler) AddSegmentToUser(w http.ResponseWriter, r *http.Request) {
+	var requestData struct {
+		Add    []string `json:"add"`
+		UserID int      `json:"user_id"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&requestData)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	ctx := r.Context()
+
+	err = h.service.AddSegmentToUser(ctx, requestData.Add, requestData.UserID)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	response := map[string]interface{}{
+		"result": "OK",
+		"add":    requestData.Add,
+	}
+
+	WrapOK(w, response)
+}
+
 func WrapOK(w http.ResponseWriter, m map[string]interface{}) {
 	res, _ := json.Marshal(m)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")

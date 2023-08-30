@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/dreamcoiI/avito_test_backend/internal/model"
 	"log"
 )
 
@@ -50,11 +49,18 @@ func (s *Storage) GetUserSegment(ctx context.Context, id int) ([]string, error) 
 }
 
 func (s *Storage) CreateSegments(ctx context.Context, slug string) error {
+
+	var count int
+	count, err := s.CheckSegment(slug)
+	if count > 0 {
+		return fmt.Errorf("segment with name '%s' already exists", slug)
+	}
+
 	query := "INSERT INTO segments VALUES ((SELECT max(id) +1 from segments), $1) "
 
 	fmt.Println("Denis aboba")
 
-	_, err := s.db.ExecContext(ctx, query, slug)
+	_, err = s.db.ExecContext(ctx, query, slug)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -62,7 +68,66 @@ func (s *Storage) CreateSegments(ctx context.Context, slug string) error {
 	return nil
 }
 
-func (s *Storage) CreateUserSegment(segment *model.UserSegment) error {
-	//
+func (s *Storage) DeleteSegment(ctx context.Context, slug string) error {
+
+	var count int
+	count, err := s.CheckSegment(slug)
+	if count == 0 {
+		return fmt.Errorf("segment with name '%s' not found", slug)
+	}
+
+	query := "DELETE FROM segments WHERE segment_name = $1"
+	_, err = s.db.ExecContext(ctx, query, slug)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
 	return nil
+
+}
+
+func (s *Storage) AddSegmentToUser(ctx context.Context, adds []string, id int) error {
+	for _, segmentName := range adds {
+		exists, err := s.CheckUserSegmentExists(ctx, id, segmentName)
+		if err != nil {
+			return err
+		}
+		if !exists {
+			err := s.InsertUserSegment(ctx, id, segmentName)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (s *Storage) CheckUserSegmentExists(ctx context.Context, userID int, segmentName string) (bool, error) {
+	query := "SELECT EXISTS(SELECT 1 FROM segment_user su JOIN segments s ON su.id_segment = s.id WHERE su.id_user = $1 AND s.segment_name = $2)"
+
+	var exists bool
+	err := s.db.QueryRowContext(ctx, query, userID, segmentName).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (s *Storage) InsertUserSegment(ctx context.Context, userID int, segmentName string) error {
+	query := "INSERT INTO segment_user (id_user, id_segment) SELECT $1, id FROM segments WHERE segment_name = $2"
+	_, err := s.db.ExecContext(ctx, query, userID, segmentName)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Storage) CheckSegment(slug string) (int, error) {
+	existsQuery := "SELECT COUNT(*) FROM segments WHERE segment_name = $1"
+	var count int
+	err := s.db.QueryRow(existsQuery, slug).Scan(&count)
+	if err != nil {
+		return -1, err
+	}
+	return count, err
 }

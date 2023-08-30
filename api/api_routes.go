@@ -9,7 +9,8 @@ func ConfigureRouters(h *handlers.Handler) *mux.Router {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/user_segment/find/", h.GetUserSegment).Methods("POST")
-	router.HandleFunc("/user_segment/", h.CreateSegment).Methods("POST")
-	//router.HandleFunc()
+	router.HandleFunc("/user_segment/create/", h.CreateSegment).Methods("POST")
+	router.HandleFunc("/user_segment/delete/", h.DeleteSegment).Methods("POST")
+	router.HandleFunc("/user_segment/add_segment/", h.AddSegmentToUser).Methods("POST")
 	return router
 }
