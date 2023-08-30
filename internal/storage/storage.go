@@ -87,6 +87,17 @@ func (s *Storage) DeleteSegment(ctx context.Context, slug string) error {
 }
 
 func (s *Storage) AddSegmentToUser(ctx context.Context, adds []string, id int) error {
+
+	var count int
+	count, err := s.CheckUser(id)
+	if count < 1 {
+		return fmt.Errorf("users with id '%d' not found", id)
+	}
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
 	for _, segmentName := range adds {
 		exists, err := s.CheckUserSegmentExists(ctx, id, segmentName)
 		if err != nil {
@@ -126,6 +137,16 @@ func (s *Storage) CheckSegment(slug string) (int, error) {
 	existsQuery := "SELECT COUNT(*) FROM segments WHERE segment_name = $1"
 	var count int
 	err := s.db.QueryRow(existsQuery, slug).Scan(&count)
+	if err != nil {
+		return -1, err
+	}
+	return count, err
+}
+
+func (s *Storage) CheckUser(id int) (int, error) {
+	existsQuery := "SELECT COUNT(*) FROM users WHERE id = $1"
+	var count int
+	err := s.db.QueryRow(existsQuery, id).Scan(&count)
 	if err != nil {
 		return -1, err
 	}
