@@ -33,7 +33,6 @@ func (s *Storage) GetUserSegment(ctx context.Context, id int) ([]string, error) 
 		var segmentName string
 		err := rows.Scan(&segmentName)
 		if err != nil {
-			fmt.Println("Денис Абоба")
 			log.Fatal(err)
 		}
 		log.Println(id, segmentName)
@@ -103,8 +102,37 @@ func (s *Storage) AddSegmentToUser(ctx context.Context, adds []string, id int) e
 		if err != nil {
 			return err
 		}
+
 		if !exists {
 			err := s.InsertUserSegment(ctx, id, segmentName)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (s *Storage) DeleteSegmentToUser(ctx context.Context, delete []string, id int) error {
+
+	var count int
+	count, err := s.CheckUser(id)
+	if count < 1 {
+		return fmt.Errorf("users with id '%d' not found", id)
+	}
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	for _, segmentName := range delete {
+		exists, err := s.CheckUserSegmentExists(ctx, id, segmentName)
+		if err != nil {
+			return err
+		}
+
+		if exists {
+			err := s.DeleteUserSegment(ctx, id, segmentName)
 			if err != nil {
 				return err
 			}
@@ -126,6 +154,15 @@ func (s *Storage) CheckUserSegmentExists(ctx context.Context, userID int, segmen
 
 func (s *Storage) InsertUserSegment(ctx context.Context, userID int, segmentName string) error {
 	query := "INSERT INTO segment_user (id_user, id_segment) SELECT $1, id FROM segments WHERE segment_name = $2"
+	_, err := s.db.ExecContext(ctx, query, userID, segmentName)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Storage) DeleteUserSegment(ctx context.Context, userID int, segmentName string) error {
+	query := "DELETE FROM segment_user WHERE id_user = $1 AND id_segment IN (SELECT id FROM segments WHERE segment_name = $2)"
 	_, err := s.db.ExecContext(ctx, query, userID, segmentName)
 	if err != nil {
 		return err

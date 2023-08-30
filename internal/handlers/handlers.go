@@ -141,6 +141,34 @@ func (h *Handler) AddSegmentToUser(w http.ResponseWriter, r *http.Request) {
 	WrapOK(w, response)
 }
 
+func (h *Handler) DeleteSegmentToUser(w http.ResponseWriter, r *http.Request) {
+	var requestData struct {
+		Delete []string `json:"delete"`
+		UserID int      `json:"user_id"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&requestData)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	ctx := r.Context()
+
+	err = h.service.DeleteSegmentToUser(ctx, requestData.Delete, requestData.UserID)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	response := map[string]interface{}{
+		"result": "OK",
+		"add":    requestData.Delete,
+	}
+
+	WrapOK(w, response)
+}
+
 func WrapOK(w http.ResponseWriter, m map[string]interface{}) {
 	res, _ := json.Marshal(m)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")

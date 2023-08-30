@@ -37,3 +37,11 @@ func (s *Service) AddSegmentToUser(ctx context.Context, adds []string, id int) e
 	}
 	return nil
 }
+
+func (s *Service) DeleteSegmentToUser(ctx context.Context, delete []string, id int) error {
+	err := s.Storage.DeleteSegmentToUser(ctx, delete, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
