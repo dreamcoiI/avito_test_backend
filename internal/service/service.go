@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/dreamcoiI/avito_test_backend/internal/storage"
 )
 
@@ -44,4 +45,13 @@ func (s *Service) DeleteSegmentToUser(ctx context.Context, delete []string, id i
 		return err
 	}
 	return nil
+}
+
+func (s *Service) GenerateSegmentHistoryCSVByMonth(ctx context.Context, year, month int, filename string) (string, error) {
+	filePath, err := s.Storage.GenerateSegmentHistoryCSVByMonth(ctx, year, month, filename)
+	if err != nil {
+		return "", err
+	}
+	fmt.Printf("CSV file generated: %s\n", filePath)
+	return filePath, nil
 }

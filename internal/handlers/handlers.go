@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/dreamcoiI/avito_test_backend/internal/service"
 	"net/http"
+	"os"
+	"path/filepath"
 )
 
 type Handler struct {
@@ -69,7 +71,6 @@ func (h *Handler) CreateSegment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(requestData.Slug + "ABOBA")
 	ctx := r.Context()
 	err = h.service.CreateSegment(ctx, requestData.Slug)
 	if err != nil {
@@ -80,6 +81,19 @@ func (h *Handler) CreateSegment(w http.ResponseWriter, r *http.Request) {
 	response := map[string]interface{}{
 		"result": "OK",
 		"data":   requestData.Slug,
+	}
+
+	resp, err := json.Marshal(response)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(resp)
+	if err != nil {
+		WrapError(w, err)
+		return
 	}
 
 	WrapOK(w, response)
@@ -96,8 +110,6 @@ func (h *Handler) DeleteSegment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(requestData.Slug + "ABOBA")
-
 	ctx := r.Context()
 	err = h.service.DeleteSegment(ctx, requestData.Slug)
 	if err != nil {
@@ -110,12 +122,26 @@ func (h *Handler) DeleteSegment(w http.ResponseWriter, r *http.Request) {
 		"data":   requestData.Slug,
 	}
 
+	resp, err := json.Marshal(response)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(resp)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
 	WrapOK(w, response)
 }
 
-func (h *Handler) AddSegmentToUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) AddAndDeleteSegmentToUser(w http.ResponseWriter, r *http.Request) {
 	var requestData struct {
 		Add    []string `json:"add"`
+		Delete []string `json:"delete"`
 		UserID int      `json:"user_id"`
 	}
 
@@ -132,19 +158,38 @@ func (h *Handler) AddSegmentToUser(w http.ResponseWriter, r *http.Request) {
 		WrapError(w, err)
 		return
 	}
+	err = h.service.DeleteSegmentToUser(ctx, requestData.Delete, requestData.UserID)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
 
 	response := map[string]interface{}{
 		"result": "OK",
 		"add":    requestData.Add,
+		"delete": requestData.Delete,
+	}
+
+	resp, err := json.Marshal(response)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(resp)
+	if err != nil {
+		WrapError(w, err)
+		return
 	}
 
 	WrapOK(w, response)
 }
 
-func (h *Handler) DeleteSegmentToUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GenerateSegmentHistoryCSVByMonth(w http.ResponseWriter, r *http.Request) {
 	var requestData struct {
-		Delete []string `json:"delete"`
-		UserID int      `json:"user_id"`
+		Year  int `json:"year"`
+		Month int `json:"month"`
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&requestData)
@@ -155,17 +200,45 @@ func (h *Handler) DeleteSegmentToUser(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	err = h.service.DeleteSegmentToUser(ctx, requestData.Delete, requestData.UserID)
+	filename := "static/csv/user_segment_history.csv"
+
+	file, err := os.Create(filename)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+	defer file.Close()
+
+	filePath, err := h.service.GenerateSegmentHistoryCSVByMonth(ctx, requestData.Year, requestData.Month, filename)
 	if err != nil {
 		WrapError(w, err)
 		return
 	}
 
+	w.Header().Set("Content-Type", filePath)
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", "user_segment_history.csv"))
+
 	response := map[string]interface{}{
-		"result": "OK",
-		"delete": requestData.Delete,
+		"result":          "OK",
+		"filepath to CSV": "http://localhost:8080/" + filePath,
 	}
 
+	resp, err := json.Marshal(response)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(resp)
+	if err != nil {
+		WrapError(w, err)
+		return
+	}
+
+	filePath = filepath.Join("static", r.URL.Path)
+	fmt.Println("Requested file path:", filePath)
+	http.ServeFile(w, r, filePath)
 	WrapOK(w, response)
 }
 

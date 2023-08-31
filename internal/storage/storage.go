@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"time"
 )
 
 type Storage struct {
@@ -22,7 +24,7 @@ func (s *Storage) GetUserSegment(ctx context.Context, id int) ([]string, error) 
 
 	var segmentNames []string
 
-	rows, err := s.db.Query(query, id)
+	rows, err := s.db.QueryContext(ctx, query, id)
 
 	if err != nil {
 		log.Fatal(err)
@@ -197,4 +199,63 @@ func (s *Storage) CheckUser(id int) (int, error) {
 		return -1, err
 	}
 	return count, err
+}
+func (s *Storage) GenerateSegmentHistoryCSVByMonth(ctx context.Context, year, month int, filename string) (string, error) {
+	startTime := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	endTime := startTime.AddDate(0, 1, -1).Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+
+	query := `
+			SELECT id_user, id_segment, 
+		   CASE 
+			   WHEN delete_time IS NOT NULL THEN 'удаление'
+			   ELSE 'добавление'
+		   END AS операция,
+		   coalesce(delete_time, add_at) AS дата_и_время
+	FROM segment_user
+	WHERE (add_at >= $1 AND add_at <= $2) OR (delete_time >= $1 AND delete_time <= $2)
+		`
+
+	rows, err := s.db.QueryContext(ctx, query, startTime, endTime)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+
+	var csvData string
+	csvData += "идентификатор пользователя;сегмент;операция;дата и время\n"
+
+	for rows.Next() {
+		var userID int
+		var segmentName, operation string
+		var timestamp time.Time
+		err := rows.Scan(&userID, &segmentName, &operation, &timestamp)
+		if err != nil {
+			return "", err
+		}
+
+		csvData += fmt.Sprintf("%d;%s;%s;%s\n", userID, segmentName, operation, timestamp.Format("2006-01-02 15:04:05"))
+	}
+
+	filePath := "" + filename
+	err = saveCSVToFile(csvData, filePath)
+	if err != nil {
+		return "", err
+	}
+
+	return filePath, nil
+}
+
+func saveCSVToFile(csvData string, filePath string) error {
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(csvData)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
