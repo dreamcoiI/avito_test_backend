@@ -6,7 +6,7 @@ services:
     ports:
       - "5432:5432"
     env_file:
-      - ./.env
+      - example.env
     volumes:
       - vol_db:/var/lib/postgres/data
       - ./migrations/migrations.sql:/docker-entrypoint-initdb.d/init.sql
@@ -17,7 +17,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - ./.env
+      - example.env
     volumes:
       - .сmd/segmentation/static:/app/static
     environment:
