@@ -17,10 +17,10 @@ CREATE TABLE IF NOT EXISTS segment_user (
     PRIMARY KEY (id_user,id_segment)
 );
 
-INSERt into users values (1, current_timestamp);
-insert into segments values (2, 'test2', current_timestamp);
-insert into segment_user values (1, 1, default,default);
-select * from segment_user;
-select * from segments;
+-- INSERt into users values (1, current_timestamp);
+-- insert into segments values (2, 'test2', current_timestamp);
+-- insert into segment_user values (1, 1, default,default);
+-- select * from segment_user;
+-- select * from segments;
 
 

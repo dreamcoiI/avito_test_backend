@@ -200,7 +200,7 @@ func (h *Handler) GenerateSegmentHistoryCSVByMonth(w http.ResponseWriter, r *htt
 
 	ctx := r.Context()
 
-	filename := "static/csv/user_segment_history.csv"
+	filename := "app/static/user_segment_history.csv"
 
 	file, err := os.Create(filename)
 	if err != nil {
@@ -220,7 +220,7 @@ func (h *Handler) GenerateSegmentHistoryCSVByMonth(w http.ResponseWriter, r *htt
 
 	response := map[string]interface{}{
 		"result":          "OK",
-		"filepath to CSV": "http://localhost:8080/" + filePath,
+		"filepath to CSV": "/" + filePath,
 	}
 
 	resp, err := json.Marshal(response)

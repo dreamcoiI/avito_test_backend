@@ -1,0 +1,28 @@
+version: '3'
+services:
+  db:
+    container_name: db
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.env
+    volumes:
+      - vol_db:/var/lib/postgres/data
+      - ./migrations/migrations.sql:/docker-entrypoint-initdb.d/init.sql
+  app:
+    depends_on:
+       - db
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./.env
+    volumes:
+      - .сmd/segmentation/static:/app/static
+    environment:
+      TZ: "Europe/Moscow"
+
+volumes:
+  vol_db:
+    driver: local
