@@ -21,42 +21,22 @@
 ### Создание сегмента
  - localhost:8080/user_segment/create
  - 
-Пример вывода 
-
- - {
-      "data": "segment",
-      "result": "OK"
-   }
+![Create](images/create.png)
 
 ### Удаление сегмента
 - localhost:8080/user_segment/delete
 
-Пример вывода
-
-- {
-     "data": "segment",
-     "result": "OK"
-  }
+![Delete](images/delete.png)
 
 ### Добавление и удаление пользователя из сегмента
 
 - localhost:8080/user_segment/add_segment
 
-Пример вывода 
 
-- {
-      "add" : ["segment"],
-      "delete" : ["segment"],
-      "user_id" : 1
-   }
+![Add](images/add.png)
 
 ### Получение сегментов пользователя 
 
 - localhost:8080/user_segment/find
 
-Пример вывода
-
-- {
-     "data": null,
-     "result": "OK"
-  }
+![Find](images/find.png)
