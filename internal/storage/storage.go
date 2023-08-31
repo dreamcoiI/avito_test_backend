@@ -57,8 +57,6 @@ func (s *Storage) CreateSegments(ctx context.Context, slug string) error {
 
 	query := "INSERT INTO segments VALUES ((SELECT max(id) +1 from segments), $1) "
 
-	fmt.Println("Denis aboba")
-
 	_, err = s.db.ExecContext(ctx, query, slug)
 	if err != nil {
 		log.Fatal(err)
@@ -153,7 +151,12 @@ func (s *Storage) CheckUserSegmentExists(ctx context.Context, userID int, segmen
 }
 
 func (s *Storage) InsertUserSegment(ctx context.Context, userID int, segmentName string) error {
-	query := "INSERT INTO segment_user (id_user, id_segment) SELECT $1, id FROM segments WHERE segment_name = $2"
+	query := `
+		INSERT INTO segment_user (id_user, id_segment)
+		SELECT $1, id FROM segments WHERE segment_name = $2 AND id NOT IN (
+			SELECT id_segment FROM segment_user WHERE id_user = $1 AND delete_time IS NOT NULL
+		)
+	`
 	_, err := s.db.ExecContext(ctx, query, userID, segmentName)
 	if err != nil {
 		return err
@@ -162,11 +165,17 @@ func (s *Storage) InsertUserSegment(ctx context.Context, userID int, segmentName
 }
 
 func (s *Storage) DeleteUserSegment(ctx context.Context, userID int, segmentName string) error {
-	query := "DELETE FROM segment_user WHERE id_user = $1 AND id_segment IN (SELECT id FROM segments WHERE segment_name = $2)"
+	query := `
+		UPDATE segment_user
+		SET delete_time = CURRENT_TIMESTAMP
+		WHERE id_user = $1 AND id_segment = (SELECT id FROM segments WHERE segment_name = $2) AND delete_time is NULL
+	`
+
 	_, err := s.db.ExecContext(ctx, query, userID, segmentName)
 	if err != nil {
-		return err
+		return fmt.Errorf("DeleteUserSegment: failed to execute query: %w", err)
 	}
+
 	return nil
 }
 

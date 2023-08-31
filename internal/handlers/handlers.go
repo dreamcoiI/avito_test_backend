@@ -163,7 +163,7 @@ func (h *Handler) DeleteSegmentToUser(w http.ResponseWriter, r *http.Request) {
 
 	response := map[string]interface{}{
 		"result": "OK",
-		"add":    requestData.Delete,
+		"delete": requestData.Delete,
 	}
 
 	WrapOK(w, response)
