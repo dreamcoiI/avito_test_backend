@@ -19,3 +19,44 @@
 
 ## Примеры запросов
 ### Создание сегмента
+ - localhost:8080/user_segment/create
+ - 
+Пример вывода 
+
+ - {
+      "data": "segment",
+      "result": "OK"
+   }
+
+### Удаление сегмента
+- localhost:8080/user_segment/delete
+
+Пример вывода
+
+- {
+     "data": "segment",
+     "result": "OK"
+  }
+
+### Добавление и удаление пользователя из сегмента
+
+- localhost:8080/user_segment/add_segment
+
+Пример вывода 
+
+- {
+      "add" : ["segment"],
+      "delete" : ["segment"],
+      "user_id" : 1
+   }
+
+### Получение сегментов пользователя 
+
+- localhost:8080/user_segment/find
+
+Пример вывода
+
+- {
+     "data": null,
+     "result": "OK"
+  }
